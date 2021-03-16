@@ -1,6 +1,7 @@
 package id.ac.ubaya.informatika.advweek4.view
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -33,21 +34,37 @@ class StudentListFragment : Fragment() {
         //layout manager: linear/grid/stager
         recView.layoutManager = LinearLayoutManager(context)
         recView.adapter = studentListAdapter
+
+        refreshLayout.setOnRefreshListener {
+            recView.visibility = View.GONE
+            txtError.visibility = View.GONE
+            progressLoad.visibility = View.VISIBLE
+            viewModel.refresh()
+            refreshLayout.isRefreshing = false
+        }
+
         observeViewModel()
+
+
     }
 
     fun observeViewModel() {
         //klo berhasil dapat data dari studentsLD
         viewModel.studentsLD.observe(viewLifecycleOwner, Observer {
             studentListAdapter.updateStudentList(it)
+            recView.visibility = View.VISIBLE
+
+            Log.d("showListFragment", it.toString())
+
         })
 
         viewModel.loadingErrorLD.observe(viewLifecycleOwner, Observer{
             txtError.visibility =if(it) View.VISIBLE else View.GONE
         })
 
-        viewModel.loadingDoneLD.observe(viewLifecycleOwner, Observer{
-            progressLoad.visibility =if(it) View.GONE else View.VISIBLE
+        viewModel.loadingLD.observe(viewLifecycleOwner, Observer{
+            progressLoad.visibility =if(it) View.VISIBLE else View.GONE
+            Log.d("showLoadingListFragment", it.toString())
         })
     }
 
